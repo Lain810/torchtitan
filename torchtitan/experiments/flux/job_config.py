@@ -33,6 +33,11 @@ class Encoder:
     """Autoencoder checkpoint path to load. This should be a local path referring to a safetensors file."""
     max_t5_encoding_len: int = 256
     """Maximum length of the T5 encoding."""
+    use_meta_device: bool = False
+    """Whether to use meta device initialization for large pretrained models to avoid OOM during loading.
+    Recommended for very large models like t5-v1_1-xxl."""
+    low_cpu_mem_usage: bool = True
+    """Whether to use low CPU memory usage when loading pretrained models. Helps with large models."""
 
 
 @dataclass

@@ -64,11 +64,19 @@ class FluxTrainer(Trainer):
         self.clip_encoder = FluxEmbedder(
             version=job_config.encoder.clip_encoder,
             random_init=job_config.training.test_mode,
-        ).to(device=self.device, dtype=self._dtype)
+            use_meta_device=job_config.encoder.use_meta_device,
+            low_cpu_mem_usage=job_config.encoder.low_cpu_mem_usage,
+            target_device=self.device,
+            target_dtype=self._dtype,
+        )
         self.t5_encoder = FluxEmbedder(
             version=job_config.encoder.t5_encoder,
             random_init=job_config.training.test_mode,
-        ).to(device=self.device, dtype=self._dtype)
+            use_meta_device=job_config.encoder.use_meta_device,
+            low_cpu_mem_usage=job_config.encoder.low_cpu_mem_usage,
+            target_device=self.device,
+            target_dtype=self._dtype,
+        )
 
         # Apply FSDP to the T5 model / CLIP model
         self.t5_encoder, self.clip_encoder = parallelize_encoders(

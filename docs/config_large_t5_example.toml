@@ -1,0 +1,53 @@
+# Sample configuration for training with large pretrained models
+# This example shows optimal settings for T5-v1_1-xxl with FSDP
+
+# Model configuration
+model:
+  flavor: flux_1_b
+
+# Training configuration  
+training:
+  data_parallel: true
+  enable_cpu_offload: false  # Set to true if GPU memory is limited
+  mixed_precision_param: bfloat16  # Use bfloat16 for memory efficiency
+  mixed_precision_reduce: float32
+  seed: 42
+  deterministic: false
+  test_mode: false  # Set to true for testing without downloading models
+
+# Encoder configuration for large models
+encoder:
+  # Path to T5-v1_1-xxl (modify to your local path)
+  t5_encoder: "/mnt/workspace/cv_multimodal/aigc/huggingface/t5-v1_1-xxl"
+  
+  # CLIP encoder (can use HuggingFace name since it's smaller)
+  clip_encoder: "openai/clip-vit-large-patch14"
+  
+  # Memory optimization settings (IMPORTANT for large models)
+  use_meta_device: true      # Enable memory-efficient loading
+  low_cpu_mem_usage: true    # Reduce CPU memory usage
+  
+  # Other settings
+  max_t5_encoding_len: 256
+  autoencoder_path: "torchtitan/experiments/flux/assets/autoencoder/ae.safetensors"
+
+# Parallelization settings
+parallel_dims:
+  dp: 8      # Data parallel size
+  tp: 1      # Tensor parallel size  
+  pp: 1      # Pipeline parallel size
+
+# Activation checkpointing for memory savings
+activation_checkpoint:
+  mode: selective  # or "full" for maximum memory savings
+
+# Validation settings
+validation:
+  enable: true
+  eval_freq: 100
+  save_img_count: 1
+
+# Example SLURM command for multi-node training:
+# sbatch --nodes=4 --ntasks-per-node=8 --cpus-per-task=8 --gres=gpu:8 \
+#        --time=24:00:00 --partition=gpu multinode_trainer.slurm \
+#        --config_path config_large_t5.toml
